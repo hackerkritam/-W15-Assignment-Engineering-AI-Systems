@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ContextPilot</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <header><div class="mark">CP</div><div><p class="eyebrow">RAG WORKBENCH</p><h1>ContextPilot</h1></div><span id="status" class="status">checking...</span></header>
+    <section class="intro"><p class="kicker">Knowledge, connected.</p><h2>Ask your documents<br/><em>better questions.</em></h2><p class="lede">A production-minded assistant with retrieval, grounded answers, and transparent sources.</p></section>
+    <section id="messages" class="messages"><div class="message assistant"><span class="avatar">CP</span><div><p>I'm ready. Ask about the indexed knowledge base, or ingest a document below.</p><small>ContextPilot · local session</small></div></div></section>
+    <form id="chat-form" class="composer"><textarea id="message" placeholder="Ask a question..." rows="2" required></textarea><button aria-label="Send message">Send <span>↗</span></button></form>
+    <details class="ingest"><summary>Ingest a document</summary><form id="ingest-form"><input id="title" placeholder="Document title" required><textarea id="content" placeholder="Paste document content..." rows="4" required></textarea><button type="submit">Add to knowledge base</button></form></details>
+  </main>
+  <script src="/static/app.js"></script>
+</body>
+</html>

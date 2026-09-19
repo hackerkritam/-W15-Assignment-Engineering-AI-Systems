@@ -1,0 +1,27 @@
+services:
+  assistant:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      API_KEY: ${API_KEY:-}
+      BASE_URL: ${BASE_URL:-https://api.openai.com/v1}
+      MODEL: ${MODEL:-gpt-4o-mini}
+      ALLOW_MOCK_PROVIDER: ${ALLOW_MOCK_PROVIDER:-true}
+    depends_on:
+      - vllm
+  vllm:
+    image: vllm/vllm-openai:latest
+    profiles: [local-model]
+    command: ["--model", "TheBloke/Mistral-7B-Instruct-v0.2-AWQ", "--quantization", "awq"]
+    ports:
+      - "8001:8000"
+    volumes:
+      - ~/.cache/huggingface:/root/.cache/huggingface
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
