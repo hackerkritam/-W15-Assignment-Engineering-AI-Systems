@@ -9,13 +9,16 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
+from app.agent import AgentRunner
 from app.config import get_settings
 from app.provider import LLMProvider
 from app.rag import store
 from app.schemas import ChatRequest, ChatResponse, HealthResponse, IngestRequest, IngestResponse
+from app.tools import TOOLS
 
 settings = get_settings()
 provider = LLMProvider(settings)
+agent_runner = AgentRunner(provider.decide, store.search, TOOLS, settings.agent_max_steps)
 cache: dict[str, tuple[float, ChatResponse]] = {}
 request_windows: dict[str, deque[float]] = defaultdict(deque)
 metrics = {"requests": 0, "errors": 0}
@@ -66,19 +69,18 @@ async def ingest(request: IngestRequest):
 async def chat(request: ChatRequest):
     metrics["requests"] += 1
     started_request = time.perf_counter()
-    sources = store.search(request.message) if request.use_rag else []
-    context = "\n\n".join(f"[{source.title}] {source.content}" for source in sources)
     key = hashlib.sha256(json.dumps(request.model_dump(), sort_keys=True).encode()).hexdigest()
     cached = cache.get(key)
     if cached and time.time() - cached[0] < settings.cache_ttl_seconds:
         result = cached[1].model_copy(update={"cached": True, "latency_ms": round((time.perf_counter() - started_request) * 1000, 2)})
         return result
     try:
-        result = await asyncio.wait_for(provider.complete(request.message, context), timeout=20)
-        answer = result.answer
+        result = await asyncio.wait_for(agent_runner.run(request.message, request.use_rag), timeout=20)
     except Exception as error:
         metrics["errors"] += 1
         raise HTTPException(status_code=503, detail=f"Assistant unavailable: {error}") from error
-    response = ChatResponse(answer=answer, sources=sources, tool_calls=result.tool_calls, provider=result.provider, latency_ms=round((time.perf_counter() - started_request) * 1000, 2))
+    if request.use_rag and not result.sources:
+        result.sources = store.search(request.message)
+    response = ChatResponse(answer=result.answer, sources=result.sources, tool_calls=result.tool_calls, provider=provider.provider_name, steps=result.steps, total_tokens=result.total_tokens, completion_status=result.status, latency_ms=round((time.perf_counter() - started_request) * 1000, 2))
     cache[key] = (time.time(), response)
     return response

@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     cache_ttl_seconds: int = 300
     vector_dimensions: int = 384
     allow_mock_provider: bool = True
+    agent_max_steps: int = 4
+    agent_max_context_chars: int = 5000
 
     model_config = SettingsConfigDict(env_file=".env", env_prefix="", extra="ignore")
 

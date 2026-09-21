@@ -22,6 +22,9 @@ class ChatResponse(BaseModel):
     provider: str
     cached: bool = False
     latency_ms: float
+    steps: int = 1
+    total_tokens: int = 0
+    completion_status: str = "completed"
 
 
 class IngestRequest(BaseModel):

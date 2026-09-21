@@ -1,0 +1,60 @@
+{
+  "summary": {
+    "task_completion_rate": "2/4",
+    "average_steps": 2.5,
+    "total_tokens": 105,
+    "failure_counts": {
+      "hard failure": 0,
+      "soft failure": 2,
+      "cascading soft failure": 0
+    }
+  },
+  "cases": [
+    {
+      "case": "cross-source search then answer",
+      "status": "success",
+      "agent_status": "completed",
+      "steps": 2,
+      "total_tokens": 53,
+      "tool_calls": [],
+      "tool_call_correct": "n/a",
+      "failure_injection": "none",
+      "answer": "The answer is 42."
+    },
+    {
+      "case": "tool calculation then answer",
+      "status": "success",
+      "agent_status": "completed",
+      "steps": 2,
+      "total_tokens": 52,
+      "tool_calls": [
+        "calculate -> 42"
+      ],
+      "tool_call_correct": true,
+      "failure_injection": "none",
+      "answer": "The answer is 42."
+    },
+    {
+      "case": "failure injection unavailable tool",
+      "status": "soft failure",
+      "agent_status": "clarification",
+      "steps": 2,
+      "total_tokens": 0,
+      "tool_calls": [],
+      "tool_call_correct": "n/a",
+      "failure_injection": "tool unavailable",
+      "answer": "The weather tool is unavailable."
+    },
+    {
+      "case": "bounded repeated search",
+      "status": "soft failure",
+      "agent_status": "step_limit",
+      "steps": 4,
+      "total_tokens": 0,
+      "tool_calls": [],
+      "tool_call_correct": "n/a",
+      "failure_injection": "repeated search",
+      "answer": "I could not complete this request within the agent step limit. Please narrow the question or provide more context."
+    }
+  ]
+}
